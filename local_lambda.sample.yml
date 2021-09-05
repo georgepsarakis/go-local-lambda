@@ -1,0 +1,8 @@
+functions:
+    -
+      # The name of the Lambda function in AWS, used to retrieve environment variables
+      name: test-multiprocessing
+      # Local function port, must be unique
+      port: 9000
+      # The path to the Lambda executable
+      mainPath: examples/echo-lambda/main.go
