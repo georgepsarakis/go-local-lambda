@@ -1,7 +1,6 @@
 package awslambda
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/rpc"
 	"time"
@@ -12,7 +11,7 @@ import (
 const RequestID = "79186900-3cb3-4b93-bc65-611d05663264"
 
 type Request struct {
-	Payload interface{}
+	Payload []byte
 	Deadline time.Time
 }
 
@@ -47,18 +46,13 @@ func (c *Client) Invoke(r Request) (*messages.InvokeResponse, error) {
 	return &response, nil
 }
 
-func rpcRequest(functionName string, payload interface{}, deadline time.Time) (*messages.InvokeRequest, error) {
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
+func rpcRequest(functionName string, payload []byte, deadline time.Time) (*messages.InvokeRequest, error) {
 	if deadline.IsZero() {
 		deadline = time.Now().Add(900 * time.Second)
 	}
 
 	return &messages.InvokeRequest{
-		Payload:      jsonPayload,
+		Payload:      payload,
 		RequestId:    RequestID,
 		Deadline: messages.InvokeRequest_Timestamp{
 			Seconds: deadline.Unix(),

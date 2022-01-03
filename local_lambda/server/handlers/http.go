@@ -35,6 +35,7 @@ func (h *InvokeHandler) Run(w http.ResponseWriter, r *http.Request) {
 
 	functionName := functionNameFromURL(r.URL.RequestURI())
 	payload, err := ioutil.ReadAll(r.Body)
+	h.Logger.Info("received request", zap.String("payload", string(payload)))
 	if logError(h.Logger, w, err) {
 		return
 	}
@@ -70,7 +71,9 @@ func (h *InvokeHandler) Run(w http.ResponseWriter, r *http.Request) {
 func logError(logger *zap.Logger, w http.ResponseWriter, e error) bool {
 	if e != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error: "+e.Error()))
+		if _, err := w.Write([]byte("Error: "+e.Error())); err != nil {
+			logger.Error("response write error", zap.Error(err))
+		}
 		logger.Error("server error", zap.Error(e))
 		return true
 	}

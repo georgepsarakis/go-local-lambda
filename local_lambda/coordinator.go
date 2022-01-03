@@ -22,12 +22,6 @@ func New(logger *zap.Logger, lambdaClient lambdaiface.LambdaAPI) *Coordinator {
 }
 
 func (c *Coordinator) Run(conf configuration.Configuration) error {
-	awsProvider := awslambda.NewAWSProvider(c.lambdaClient)
-	var names []string
-	for _, f := range conf.Functions {
-		names = append(names, f.Name)
-	}
-
 	g := errgroup.Group{}
 	g.Go(func() error {
 		// Start the HTTP server
@@ -35,7 +29,7 @@ func (c *Coordinator) Run(conf configuration.Configuration) error {
 	})
 	g.Go(func() error {
 		// Start Lambda sub-processes
-		return StartAll(c.logger, conf, awsProvider)
+		return StartAll(c.logger, conf, awslambda.NewAWSProvider(c.lambdaClient))
 	})
 	return g.Wait()
 }

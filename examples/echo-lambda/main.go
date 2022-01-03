@@ -5,9 +5,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func echoHandler(input string) (string, error) {
+func echoHandler(input map[string]string) (map[string]string, error) {
 	fmt.Println(fmt.Sprintf("received input: %q", input))
-	return fmt.Sprintf(`{"echo": %q}`, input), nil
+	return input, nil
 }
 
 func main() {

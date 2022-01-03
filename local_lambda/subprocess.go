@@ -74,6 +74,7 @@ func StartAll(logger *zap.Logger, config configuration.Configuration, provider a
 			continue
 		}
 		g.Go(func() error {
+			var err error
 			remoteEnv, err := provider.GetEnvironmentVariables(f.Name)
 			if err != nil {
 				return errors.New("cannot resolve remote environment variables: "+err.Error())
@@ -84,14 +85,17 @@ func StartAll(logger *zap.Logger, config configuration.Configuration, provider a
 			if err != nil {
 				return err
 			}
-			defer tail.Wait()
+			defer func() {
+				err = tail.Wait()
+			}()
 
 			logger.Info("starting sub-process", zap.String("command", proc.cmd.String()))
 			logger.Info("remote environment variables", zap.Any("aws", remoteEnv))
 			if err := proc.Start(); err != nil {
 				return err
 			}
-			return proc.Wait()
+			err = proc.Wait()
+			return err
 		})
 	}
 	return g.Wait()
